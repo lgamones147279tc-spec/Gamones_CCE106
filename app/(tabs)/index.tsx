@@ -1,349 +1,644 @@
 import React, { useState } from "react";
 import {
-  Image,
-  Pressable,
+  SafeAreaView,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
 } from "react-native";
 
+const emptyProfile = {
+  fullName: "",
+  program: "",
+  biography: "",
+  email: "",
+  phone: "",
+};
+
 export default function App() {
-  const [name, setName] = useState("");
-  const [program, setProgram] = useState("");
-  const [bio, setBio] = useState("");
-
-  const [savedName, setSavedName] = useState("");
-  const [savedProgram, setSavedProgram] = useState("");
-  const [savedBio, setSavedBio] = useState("");
-
+  const [profile, setProfile] = useState(emptyProfile);
+  const [form, setForm] = useState(emptyProfile);
+  const [editing, setEditing] = useState(true);
+  const [errors, setErrors] = useState({});
   const [message, setMessage] = useState("");
 
-  // SAVE PROFILE
+  const updateField = (field, value) => {
+    setForm({
+      ...form,
+      [field]: value,
+    });
+
+    if (errors[field]) {
+      setErrors({
+        ...errors,
+        [field]: "",
+      });
+    }
+
+    setMessage("");
+  };
+
+  const validateForm = () => {
+    const validationErrors = {};
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!form.fullName.trim()) {
+      validationErrors.fullName = "Full name is required.";
+    }
+
+    if (!form.program.trim()) {
+      validationErrors.program = "Program is required.";
+    }
+
+    if (!form.email.trim()) {
+      validationErrors.email = "Email is required.";
+    } else if (!emailPattern.test(form.email.trim())) {
+      validationErrors.email = "Please enter a valid email address.";
+    }
+
+    setErrors(validationErrors);
+
+    return Object.keys(validationErrors).length === 0;
+  };
+
   const saveProfile = () => {
-    if (name.trim() === "") {
-      setMessage("Please enter your full name.");
+    if (!validateForm()) {
+      setMessage("Please complete the required fields.");
       return;
     }
 
-    if (program.trim() === "") {
-      setMessage("Please enter your program.");
-      return;
-    }
+    const savedProfile = {
+      fullName: form.fullName.trim(),
+      program: form.program.trim(),
+      biography: form.biography.trim(),
+      email: form.email.trim(),
+      phone: form.phone.trim(),
+    };
 
-    if (bio.trim() === "") {
-      setMessage("Please enter your biography.");
-      return;
-    }
-
-    // Save the information
-    setSavedName(name);
-    setSavedProgram(program);
-    setSavedBio(bio);
-
+    setProfile(savedProfile);
+    setForm(savedProfile);
+    setEditing(false);
     setMessage("✓ Profile saved successfully!");
   };
 
+  const editProfile = () => {
+    setForm(profile);
+    setErrors({});
+    setMessage("");
+    setEditing(true);
+  };
+
+  const cancelEdit = () => {
+    setForm(profile);
+    setErrors({});
+    setMessage("");
+    setEditing(false);
+  };
+
+  const renderInput = (
+    label,
+    field,
+    placeholder,
+    options = {}
+  ) => {
+    const value = form[field];
+    const error = errors[field];
+
+    return (
+      <View style={styles.fieldContainer}>
+        <Text style={styles.label}>{label}</Text>
+
+        <TextInput
+          style={[
+            styles.input,
+            error && styles.inputError,
+            options.multiline && styles.bioInput,
+          ]}
+          value={value}
+          onChangeText={(text) => updateField(field, text)}
+          placeholder={placeholder}
+          placeholderTextColor="#9CA3AF"
+          {...options}
+        />
+
+        {error && <Text style={styles.errorText}>{error}</Text>}
+      </View>
+    );
+  };
+
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-    >
-      {/* TITLE */}
-      <Text style={styles.title}>
-        Personal Profile
-      </Text>
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor="#F5F7FB"
+      />
 
-      <Text style={styles.subtitle}>
-        Create and edit your profile
-      </Text>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>Personal Profile</Text>
 
-      {/* PROFILE CONTAINER */}
-      <View style={styles.profileCard}>
-        <Image
-          source={{
-            uri: "https://i.pravatar.cc/300",
-          }}
-          style={styles.image}
-        />
-
-        <Text style={styles.profileName}>
-          {savedName || "Your Name"}
-        </Text>
-
-        <Text style={styles.profileProgram}>
-          {savedProgram || "Your Program"}
-        </Text>
-      </View>
-
-      {/* PERSONAL INFORMATION CONTAINER */}
-      <View style={styles.card}>
-        <Text style={styles.heading}>
-          Personal Information
-        </Text>
-
-        {/* FULL NAME */}
-        <Text style={styles.label}>
-          Full Name
-        </Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your full name"
-          placeholderTextColor="#94A3B8"
-          value={name}
-          onChangeText={(text) => {
-            setName(text);
-            setMessage("");
-          }}
-        />
-
-        {/* PROGRAM */}
-        <Text style={styles.label}>
-          Program
-        </Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your program"
-          placeholderTextColor="#94A3B8"
-          value={program}
-          onChangeText={(text) => {
-            setProgram(text);
-            setMessage("");
-          }}
-        />
-
-        {/* BIO */}
-        <Text style={styles.label}>
-          Short Biography
-        </Text>
-
-        <TextInput
-          style={styles.bioInput}
-          placeholder="Write a short biography"
-          placeholderTextColor="#94A3B8"
-          value={bio}
-          onChangeText={(text) => {
-            setBio(text);
-            setMessage("");
-          }}
-          multiline
-        />
-      </View>
-
-      {/* SEPARATE SAVE CONTAINER */}
-      <View style={styles.saveContainer}>
-        <Text style={styles.saveTitle}>
-          Save Profile
-        </Text>
-
-        <Text style={styles.saveDescription}>
-          Save your information when you are finished.
-        </Text>
-
-        <Pressable
-          style={styles.saveButton}
-          onPress={saveProfile}
-        >
-          <Text style={styles.buttonText}>
-            Save Profile
+          <Text style={styles.subtitle}>
+            Enter and manage your personal information
           </Text>
-        </Pressable>
+        </View>
 
-        {/* MESSAGE */}
-        {message !== "" && (
-          <Text
+        {/* Profile Image */}
+        <View style={styles.imageContainer}>
+          <View style={styles.imagePlaceholder}>
+            <Text style={styles.imagePlaceholderText}>
+              PHOTO
+            </Text>
+          </View>
+
+          <Text style={styles.imageHint}>Profile Image</Text>
+        </View>
+
+        {/* Profile Card */}
+        <View style={styles.card}>
+          {editing ? (
+            <>
+              {renderInput(
+                "Full Name *",
+                "fullName",
+                "Enter your full name",
+                {
+                  autoCapitalize: "words",
+                }
+              )}
+
+              {renderInput(
+                "Program *",
+                "program",
+                "Enter your program"
+              )}
+
+              {renderInput(
+                "Short Biography",
+                "biography",
+                "Write a short biography about yourself",
+                {
+                  multiline: true,
+                  textAlignVertical: "top",
+                }
+              )}
+
+              {/* Contact Information */}
+              <View style={styles.contactSection}>
+                <Text style={styles.sectionTitle}>
+                  Contact Information
+                </Text>
+
+                {renderInput(
+                  "Email *",
+                  "email",
+                  "Enter your email",
+                  {
+                    keyboardType: "email-address",
+                    autoCapitalize: "none",
+                    autoCorrect: false,
+                  }
+                )}
+
+                {renderInput(
+                  "Phone Number",
+                  "phone",
+                  "Enter your phone number",
+                  {
+                    keyboardType: "phone-pad",
+                  }
+                )}
+              </View>
+
+              {/* Buttons */}
+              <View style={styles.buttonRow}>
+                {profile.fullName !== "" && (
+                  <TouchableOpacity
+                    style={styles.cancelButton}
+                    onPress={cancelEdit}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.cancelButtonText}>
+                      Cancel
+                    </Text>
+                  </TouchableOpacity>
+                )}
+
+                <TouchableOpacity
+                  style={[
+                    styles.saveButton,
+                    profile.fullName === "" && styles.fullButton,
+                  ]}
+                  onPress={saveProfile}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.saveButtonText}>
+                    Save Profile
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          ) : (
+            <>
+              <View style={styles.fieldContainer}>
+                <Text style={styles.label}>Full Name *</Text>
+                <Text style={styles.value}>
+                  {profile.fullName}
+                </Text>
+              </View>
+
+              <View style={styles.fieldContainer}>
+                <Text style={styles.label}>Program *</Text>
+                <Text style={styles.value}>
+                  {profile.program}
+                </Text>
+              </View>
+
+              <View style={styles.fieldContainer}>
+                <Text style={styles.label}>
+                  Short Biography
+                </Text>
+
+                <Text style={styles.bioText}>
+                  {profile.biography ||
+                    "No biography provided."}
+                </Text>
+              </View>
+
+              <View style={styles.contactSection}>
+                <Text style={styles.sectionTitle}>
+                  Contact Information
+                </Text>
+
+                <View style={styles.fieldContainer}>
+                  <Text style={styles.label}>Email *</Text>
+                  <Text style={styles.value}>
+                    {profile.email}
+                  </Text>
+                </View>
+
+                <View style={styles.fieldContainer}>
+                  <Text style={styles.label}>
+                    Phone Number
+                  </Text>
+
+                  <Text style={styles.value}>
+                    {profile.phone ||
+                      "No phone number provided."}
+                  </Text>
+                </View>
+              </View>
+
+              <TouchableOpacity
+                style={styles.editButton}
+                onPress={editProfile}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.editButtonText}>
+                  Edit Profile
+                </Text>
+              </TouchableOpacity>
+            </>
+          )}
+        </View>
+
+        {/* Message */}
+        {message && (
+          <View
             style={[
-              styles.message,
-              message.includes("Please") &&
-                styles.errorMessage,
+              styles.messageBox,
+              message.startsWith("✓")
+                ? styles.successBox
+                : styles.warningBox,
             ]}
           >
-            {message}
-          </Text>
+            <Text
+              style={[
+                styles.messageText,
+                message.startsWith("✓")
+                  ? styles.successText
+                  : styles.warningText,
+              ]}
+            >
+              {message}
+            </Text>
+          </View>
         )}
-      </View>
 
-      {/* ABOUT ME */}
-      <View style={styles.aboutCard}>
-        <Text style={styles.aboutTitle}>
-          About Me
-        </Text>
+        {/* Saved Result */}
+        {!editing && profile.fullName !== "" && (
+          <View style={styles.savedResult}>
+            <Text style={styles.savedTitle}>
+              ✓ Saved Profile
+            </Text>
 
-        <Text style={styles.aboutText}>
-          {savedBio || "No biography added yet."}
-        </Text>
-      </View>
-    </ScrollView>
+            <Text style={styles.savedText}>
+              Your information has been successfully saved
+              and is displayed above.
+            </Text>
+          </View>
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    backgroundColor: "#F1F5F9",
+    backgroundColor: "#EEF4FF",
   },
 
-  content: {
-    padding: 20,
-    paddingTop: 40,
-    paddingBottom: 40,
+  container: {
+    padding: 18,
+    paddingBottom: 50,
   },
 
-  /* TITLE */
+  // Header
+  header: {
+    marginBottom: 24,
+    paddingTop: 10,
+  },
+
   title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#1E293B",
+    fontSize: 30,
+    fontWeight: "800",
+    color: "#172554",
+    letterSpacing: 0.3,
   },
 
   subtitle: {
-    textAlign: "center",
+    fontSize: 14,
     color: "#64748B",
-    marginTop: 5,
-    marginBottom: 20,
+    marginTop: 6,
+    lineHeight: 20,
   },
 
-  /* PROFILE */
-  profileCard: {
-    backgroundColor: "#FFFFFF",
-    padding: 20,
-    borderRadius: 15,
+  // Profile Image
+  imageContainer: {
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 24,
   },
 
-  image: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
-    marginBottom: 12,
+  imagePlaceholder: {
+    width: 105,
+    height: 105,
+    borderRadius: 53,
+    backgroundColor: "#DBEAFE",
+    borderWidth: 4,
+    borderColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+
+    shadowColor: "#1E3A8A",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
   },
 
-  profileName: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#1E293B",
-  },
-
-  profileProgram: {
-    fontSize: 16,
+  imagePlaceholderText: {
     color: "#2563EB",
-    marginTop: 5,
+    fontSize: 20,
+    fontWeight: "800",
   },
 
-  /* PERSONAL INFORMATION */
+  imageHint: {
+    marginTop: 10,
+    fontSize: 13,
+    color: "#64748B",
+    fontWeight: "500",
+  },
+
+  // Main Card
   card: {
     backgroundColor: "#FFFFFF",
-    padding: 20,
-    borderRadius: 15,
-    marginBottom: 15,
+    borderRadius: 22,
+    padding: 22,
+
+    shadowColor: "#0F172A",
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
   },
 
-  heading: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#2563EB",
-    marginBottom: 15,
+  // Fields
+  fieldContainer: {
+    marginBottom: 22,
   },
 
   label: {
     fontSize: 14,
-    fontWeight: "bold",
-    color: "#334155",
-    marginBottom: 6,
+    fontWeight: "700",
+    color: "#1E293B",
+    marginBottom: 9,
+  },
+
+  value: {
+    fontSize: 17,
+    color: "#0F172A",
+    fontWeight: "600",
+    paddingVertical: 5,
   },
 
   input: {
-    backgroundColor: "#F8FAFC",
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: "#CBD5E1",
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 15,
-    color: "#1E293B",
-    marginBottom: 15,
+    borderRadius: 13,
+    paddingHorizontal: 15,
+    paddingVertical: 13,
+    fontSize: 16,
+    color: "#0F172A",
+    backgroundColor: "#F8FAFC",
+  },
+
+  inputError: {
+    borderColor: "#EF4444",
+    backgroundColor: "#FEF2F2",
   },
 
   bioInput: {
-    backgroundColor: "#F8FAFC",
-    borderWidth: 1,
-    borderColor: "#CBD5E1",
-    borderRadius: 8,
-    padding: 12,
-    height: 100,
+    minHeight: 110,
+    paddingTop: 14,
+  },
+
+  bioText: {
     fontSize: 15,
-    color: "#1E293B",
-    textAlignVertical: "top",
+    lineHeight: 23,
+    color: "#475569",
+    backgroundColor: "#F8FAFC",
+    borderRadius: 12,
+    padding: 14,
   },
 
-  /* SAVE CONTAINER */
-  saveContainer: {
-    backgroundColor: "#FFFFFF",
-    padding: 20,
-    borderRadius: 15,
-    marginBottom: 20,
-    borderWidth: 2,
-    borderColor: "#2563EB",
-  },
-
-  saveTitle: {
-    fontSize: 21,
-    fontWeight: "bold",
-    color: "#1E40AF",
-    marginBottom: 6,
-  },
-
-  saveDescription: {
-    fontSize: 14,
-    color: "#64748B",
-    marginBottom: 15,
-  },
-
-  saveButton: {
-    backgroundColor: "#2563EB",
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-
-  buttonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-
-  message: {
-    textAlign: "center",
-    marginTop: 12,
-    color: "#166534",
-    fontWeight: "bold",
-  },
-
-  errorMessage: {
+  errorText: {
     color: "#DC2626",
+    fontSize: 12,
+    marginTop: 6,
+    fontWeight: "500",
   },
 
-  /* ABOUT */
-  aboutCard: {
-    backgroundColor: "#EFF6FF",
-    padding: 20,
-    borderRadius: 15,
-  },
-
-  aboutTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#1E40AF",
+  // Contact Section
+  contactSection: {
+    borderTopWidth: 1,
+    borderTopColor: "#E2E8F0",
+    paddingTop: 20,
+    marginTop: 2,
     marginBottom: 8,
   },
 
-  aboutText: {
-    fontSize: 15,
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#172554",
+    marginBottom: 17,
+  },
+
+  // Buttons
+  buttonRow: {
+    flexDirection: "row",
+    marginTop: 5,
+  },
+
+  cancelButton: {
+    flex: 1,
+    borderWidth: 1.5,
+    borderColor: "#CBD5E1",
+    borderRadius: 13,
+    paddingVertical: 15,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 6,
+    backgroundColor: "#FFFFFF",
+  },
+
+  cancelButtonText: {
     color: "#475569",
-    lineHeight: 22,
+    fontSize: 16,
+    fontWeight: "700",
+  },
+
+  saveButton: {
+    flex: 1,
+    backgroundColor: "#2563EB",
+    borderRadius: 13,
+    paddingVertical: 15,
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 6,
+
+    shadowColor: "#2563EB",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 7,
+    elevation: 4,
+  },
+
+  fullButton: {
+    flex: 1,
+    marginLeft: 0,
+  },
+
+  saveButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "800",
+  },
+
+  editButton: {
+    backgroundColor: "#2563EB",
+    borderRadius: 13,
+    paddingVertical: 15,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 5,
+
+    shadowColor: "#2563EB",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 7,
+    elevation: 4,
+  },
+
+  editButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "800",
+  },
+
+  // Feedback
+  messageBox: {
+    marginTop: 16,
+    padding: 15,
+    borderRadius: 13,
+  },
+
+  successBox: {
+    backgroundColor: "#ECFDF5",
+    borderWidth: 1,
+    borderColor: "#A7F3D0",
+  },
+
+  warningBox: {
+    backgroundColor: "#FFFBEB",
+    borderWidth: 1,
+    borderColor: "#FDE68A",
+  },
+
+  messageText: {
+    fontSize: 14,
+    fontWeight: "700",
+    textAlign: "center",
+  },
+
+  successText: {
+    color: "#047857",
+  },
+
+  warningText: {
+    color: "#B45309",
+  },
+
+  // Saved Profile
+  savedResult: {
+    marginTop: 16,
+    padding: 18,
+    backgroundColor: "#EFF6FF",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#BFDBFE",
+  },
+
+  savedTitle: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#1D4ED8",
+    marginBottom: 6,
+  },
+
+  savedText: {
+    fontSize: 13,
+    color: "#3B82F6",
+    lineHeight: 20,
   },
 });
