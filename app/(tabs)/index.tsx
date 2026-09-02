@@ -1,349 +1,156 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
-  Image,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
-} from "react-native";
+} from 'react-native';
 
-export default function App() {
-  const [name, setName] = useState("");
-  const [program, setProgram] = useState("");
-  const [bio, setBio] = useState("");
+export default function Counter() {
+  const [count, setCount] = useState(0);
 
-  const [savedName, setSavedName] = useState("");
-  const [savedProgram, setSavedProgram] = useState("");
-  const [savedBio, setSavedBio] = useState("");
+  const increase = () => {
+    setCount((previousCount) => previousCount + 1);
+  };
 
-  const [message, setMessage] = useState("");
+  const decrease = () => {
+    setCount((previousCount) =>
+      previousCount > 0 ? previousCount - 1 : 0
+    );
+  };
 
-  // SAVE PROFILE
-  const saveProfile = () => {
-    if (name.trim() === "") {
-      setMessage("Please enter your full name.");
-      return;
-    }
-
-    if (program.trim() === "") {
-      setMessage("Please enter your program.");
-      return;
-    }
-
-    if (bio.trim() === "") {
-      setMessage("Please enter your biography.");
-      return;
-    }
-
-    // Save the information
-    setSavedName(name);
-    setSavedProgram(program);
-    setSavedBio(bio);
-
-    setMessage("✓ Profile saved successfully!");
+  const clear = () => {
+    setCount(0);
   };
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-    >
-      {/* TITLE */}
-      <Text style={styles.title}>
-        Personal Profile
-      </Text>
+    <View style={styles.container}>
 
-      <Text style={styles.subtitle}>
-        Create and edit your profile
-      </Text>
+      <Text style={styles.heading}>Counter App</Text>
+      <Text style={styles.subtitle}>Keep track of your count</Text>
 
-      {/* PROFILE CONTAINER */}
-      <View style={styles.profileCard}>
-        <Image
-          source={{
-            uri: "https://i.pravatar.cc/300",
-          }}
-          style={styles.image}
-        />
-
-        <Text style={styles.profileName}>
-          {savedName || "Your Name"}
-        </Text>
-
-        <Text style={styles.profileProgram}>
-          {savedProgram || "Your Program"}
-        </Text>
+      <View style={styles.counterBox}>
+        <Text style={styles.counter}>{count}</Text>
       </View>
 
-      {/* PERSONAL INFORMATION CONTAINER */}
-      <View style={styles.card}>
-        <Text style={styles.heading}>
-          Personal Information
-        </Text>
-
-        {/* FULL NAME */}
-        <Text style={styles.label}>
-          Full Name
-        </Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your full name"
-          placeholderTextColor="#94A3B8"
-          value={name}
-          onChangeText={(text) => {
-            setName(text);
-            setMessage("");
-          }}
-        />
-
-        {/* PROGRAM */}
-        <Text style={styles.label}>
-          Program
-        </Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your program"
-          placeholderTextColor="#94A3B8"
-          value={program}
-          onChangeText={(text) => {
-            setProgram(text);
-            setMessage("");
-          }}
-        />
-
-        {/* BIO */}
-        <Text style={styles.label}>
-          Short Biography
-        </Text>
-
-        <TextInput
-          style={styles.bioInput}
-          placeholder="Write a short biography"
-          placeholderTextColor="#94A3B8"
-          value={bio}
-          onChangeText={(text) => {
-            setBio(text);
-            setMessage("");
-          }}
-          multiline
-        />
-      </View>
-
-      {/* SEPARATE SAVE CONTAINER */}
-      <View style={styles.saveContainer}>
-        <Text style={styles.saveTitle}>
-          Save Profile
-        </Text>
-
-        <Text style={styles.saveDescription}>
-          Save your information when you are finished.
-        </Text>
-
+      <View style={styles.buttonRow}>
         <Pressable
-          style={styles.saveButton}
-          onPress={saveProfile}
+          style={styles.minusButton}
+          onPress={decrease}
         >
-          <Text style={styles.buttonText}>
-            Save Profile
-          </Text>
+          <Text style={styles.buttonText}>−</Text>
         </Pressable>
 
-        {/* MESSAGE */}
-        {message !== "" && (
-          <Text
-            style={[
-              styles.message,
-              message.includes("Please") &&
-                styles.errorMessage,
-            ]}
-          >
-            {message}
-          </Text>
-        )}
+        <Pressable
+          style={styles.plusButton}
+          onPress={increase}
+        >
+          <Text style={styles.buttonText}>+</Text>
+        </Pressable>
       </View>
 
-      {/* ABOUT ME */}
-      <View style={styles.aboutCard}>
-        <Text style={styles.aboutTitle}>
-          About Me
-        </Text>
+      <Pressable
+        style={styles.clearButton}
+        onPress={clear}
+      >
+        <Text style={styles.clearText}>Reset Counter</Text>
+      </Pressable>
 
-        <Text style={styles.aboutText}>
-          {savedBio || "No biography added yet."}
-        </Text>
-      </View>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F1F5F9",
-  },
-
-  content: {
-    padding: 20,
-    paddingTop: 40,
-    paddingBottom: 40,
-  },
-
-  /* TITLE */
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#1E293B",
-  },
-
-  subtitle: {
-    textAlign: "center",
-    color: "#64748B",
-    marginTop: 5,
-    marginBottom: 20,
-  },
-
-  /* PROFILE */
-  profileCard: {
-    backgroundColor: "#FFFFFF",
-    padding: 20,
-    borderRadius: 15,
-    alignItems: "center",
-    marginBottom: 20,
-  },
-
-  image: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
-    marginBottom: 12,
-  },
-
-  profileName: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#1E293B",
-  },
-
-  profileProgram: {
-    fontSize: 16,
-    color: "#2563EB",
-    marginTop: 5,
-  },
-
-  /* PERSONAL INFORMATION */
-  card: {
-    backgroundColor: "#FFFFFF",
-    padding: 20,
-    borderRadius: 15,
-    marginBottom: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 25,
+    backgroundColor: '#F4F7FB',
   },
 
   heading: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#2563EB",
-    marginBottom: 15,
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#1E293B',
   },
 
-  label: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "#334155",
-    marginBottom: 6,
-  },
-
-  input: {
-    backgroundColor: "#F8FAFC",
-    borderWidth: 1,
-    borderColor: "#CBD5E1",
-    borderRadius: 8,
-    padding: 12,
+  subtitle: {
     fontSize: 15,
-    color: "#1E293B",
-    marginBottom: 15,
+    color: '#64748B',
+    marginTop: 5,
+    marginBottom: 30,
   },
 
-  bioInput: {
-    backgroundColor: "#F8FAFC",
-    borderWidth: 1,
-    borderColor: "#CBD5E1",
-    borderRadius: 8,
-    padding: 12,
-    height: 100,
-    fontSize: 15,
-    color: "#1E293B",
-    textAlignVertical: "top",
+  counterBox: {
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    marginBottom: 35,
   },
 
-  /* SAVE CONTAINER */
-  saveContainer: {
-    backgroundColor: "#FFFFFF",
-    padding: 20,
-    borderRadius: 15,
-    marginBottom: 20,
-    borderWidth: 2,
-    borderColor: "#2563EB",
+  counter: {
+    fontSize: 65,
+    fontWeight: 'bold',
+    color: '#2563EB',
   },
 
-  saveTitle: {
-    fontSize: 21,
-    fontWeight: "bold",
-    color: "#1E40AF",
-    marginBottom: 6,
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 20,
+    marginBottom: 25,
   },
 
-  saveDescription: {
-    fontSize: 14,
-    color: "#64748B",
-    marginBottom: 15,
+  plusButton: {
+    width: 75,
+    height: 75,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#2563EB',
+    elevation: 4,
   },
 
-  saveButton: {
-    backgroundColor: "#2563EB",
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
+  minusButton: {
+    width: 75,
+    height: 75,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#475569',
+    elevation: 4,
   },
 
   buttonText: {
-    color: "#FFFFFF",
+    fontSize: 38,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+
+  clearButton: {
+    width: 170,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+  },
+
+  clearText: {
     fontSize: 16,
-    fontWeight: "bold",
-  },
-
-  message: {
-    textAlign: "center",
-    marginTop: 12,
-    color: "#166534",
-    fontWeight: "bold",
-  },
-
-  errorMessage: {
-    color: "#DC2626",
-  },
-
-  /* ABOUT */
-  aboutCard: {
-    backgroundColor: "#EFF6FF",
-    padding: 20,
-    borderRadius: 15,
-  },
-
-  aboutTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#1E40AF",
-    marginBottom: 8,
-  },
-
-  aboutText: {
-    fontSize: 15,
-    color: "#475569",
-    lineHeight: 22,
+    fontWeight: '600',
+    color: '#475569',
   },
 });
