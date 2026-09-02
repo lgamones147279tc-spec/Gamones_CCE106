@@ -1,61 +1,199 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
-  Pressable,
   StyleSheet,
   Text,
+  TextInput,
+  TouchableOpacity,
   View,
-} from 'react-native';
+} from "react-native";
 
-export default function Counter() {
-  const [count, setCount] = useState(0);
+export default function Calculator() {
+  const [input, setInput] = useState("");
+  const [firstNumber, setFirstNumber] = useState("");
+  const [operator, setOperator] = useState("");
+  const [message, setMessage] = useState("");
 
-  const increase = () => {
-    setCount((previousCount) => previousCount + 1);
+  // Select operator
+  const selectOperator = (op: string) => {
+    // Check if input is empty
+    if (input.trim() === "") {
+      setMessage("Please enter a number.");
+      return;
+    }
+
+    const number = Number(input);
+
+    // Check if input is invalid
+    if (Number.isNaN(number)) {
+      setMessage("Please enter a valid number.");
+      return;
+    }
+
+    // Save the first number
+    setFirstNumber(input);
+
+    // Save the operator
+    setOperator(op);
+
+    // Clear input for second number
+    setInput("");
+
+    // Clear message
+    setMessage("");
   };
 
-  const decrease = () => {
-    setCount((previousCount) =>
-      previousCount > 0 ? previousCount - 1 : 0
-    );
+  // Calculate result
+  const calculate = () => {
+    // Check first number
+    if (firstNumber === "") {
+      setMessage("Please enter the first number.");
+      return;
+    }
+
+    // Check operator
+    if (operator === "") {
+      setMessage("Please select an operator.");
+      return;
+    }
+
+    // Check second number
+    if (input.trim() === "") {
+      setMessage("Please enter the second number.");
+      return;
+    }
+
+    const num1 = Number(firstNumber);
+    const num2 = Number(input);
+
+    // Validate numbers
+    if (Number.isNaN(num1) || Number.isNaN(num2)) {
+      setMessage("Please enter valid numbers.");
+      return;
+    }
+
+    // Prevent division by zero
+    if (operator === "/" && num2 === 0) {
+      setMessage("Cannot divide by zero.");
+      return;
+    }
+
+    let answer = 0;
+
+    switch (operator) {
+      case "+":
+        answer = num1 + num2;
+        break;
+
+      case "-":
+        answer = num1 - num2;
+        break;
+
+      case "*":
+        answer = num1 * num2;
+        break;
+
+      case "/":
+        answer = num1 / num2;
+        break;
+    }
+
+    // Display result inside the input box
+    setInput(answer.toString());
+
+    // Clear first number and operator
+    setFirstNumber("");
+    setOperator("");
+
+    // Clear error message
+    setMessage("");
   };
 
-  const clear = () => {
-    setCount(0);
+  // Clear calculator
+  const clearCalculator = () => {
+    setInput("");
+    setFirstNumber("");
+    setOperator("");
+    setMessage("");
   };
 
   return (
     <View style={styles.container}>
+      <Text style={styles.title}>Simple Calculator</Text>
 
-      <Text style={styles.heading}>Counter App</Text>
-      <Text style={styles.subtitle}>Keep track of your count</Text>
+      {/* ONE INPUT BOX */}
+      <TextInput
+        style={styles.input}
+        placeholder={
+          operator === ""
+            ? "Enter number"
+            : "Enter second number"
+        }
+        keyboardType="numeric"
+        value={input}
+        onChangeText={(text) => {
+          setInput(text);
+          setMessage("");
+        }}
+      />
 
-      <View style={styles.counterBox}>
-        <Text style={styles.counter}>{count}</Text>
-      </View>
+      {/* Show selected operator */}
+      {operator !== "" && (
+        <Text style={styles.operation}>
+          {firstNumber} {operator}
+        </Text>
+      )}
 
+      {/* Operator Buttons */}
       <View style={styles.buttonRow}>
-        <Pressable
-          style={styles.minusButton}
-          onPress={decrease}
-        >
-          <Text style={styles.buttonText}>−</Text>
-        </Pressable>
-
-        <Pressable
-          style={styles.plusButton}
-          onPress={increase}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => selectOperator("+")}
         >
           <Text style={styles.buttonText}>+</Text>
-        </Pressable>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => selectOperator("-")}
+        >
+          <Text style={styles.buttonText}>−</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => selectOperator("*")}
+        >
+          <Text style={styles.buttonText}>×</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => selectOperator("/")}
+        >
+          <Text style={styles.buttonText}>÷</Text>
+        </TouchableOpacity>
       </View>
 
-      <Pressable
-        style={styles.clearButton}
-        onPress={clear}
+      {/* Equals Button */}
+      <TouchableOpacity
+        style={styles.equalsButton}
+        onPress={calculate}
       >
-        <Text style={styles.clearText}>Reset Counter</Text>
-      </Pressable>
+        <Text style={styles.equalsText}>=</Text>
+      </TouchableOpacity>
 
+      {/* Error Message */}
+      {message !== "" && (
+        <Text style={styles.error}>{message}</Text>
+      )}
+
+      {/* Clear Button */}
+      <TouchableOpacity
+        style={styles.clearButton}
+        onPress={clearCalculator}
+      >
+        <Text style={styles.clearText}>Clear</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -63,94 +201,90 @@ export default function Counter() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
     padding: 25,
-    backgroundColor: '#F4F7FB',
+    backgroundColor: "#f5f5f5",
   },
 
-  heading: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#1E293B',
-  },
-
-  subtitle: {
-    fontSize: 15,
-    color: '#64748B',
-    marginTop: 5,
+  title: {
+    fontSize: 30,
+    fontWeight: "bold",
+    textAlign: "center",
     marginBottom: 30,
   },
 
-  counterBox: {
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    elevation: 6,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    marginBottom: 35,
+  input: {
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 10,
+    padding: 18,
+    fontSize: 28,
+    textAlign: "right",
+    marginBottom: 10,
   },
 
-  counter: {
-    fontSize: 65,
-    fontWeight: 'bold',
-    color: '#2563EB',
+  operation: {
+    fontSize: 20,
+    textAlign: "right",
+    marginBottom: 15,
+    color: "#555",
   },
 
   buttonRow: {
-    flexDirection: 'row',
-    gap: 20,
-    marginBottom: 25,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 10,
   },
 
-  plusButton: {
-    width: 75,
-    height: 75,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#2563EB',
-    elevation: 4,
-  },
-
-  minusButton: {
-    width: 75,
-    height: 75,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#475569',
-    elevation: 4,
+  button: {
+    backgroundColor: "#333",
+    width: 65,
+    height: 55,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   buttonText: {
-    fontSize: 38,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: "white",
+    fontSize: 25,
+    fontWeight: "bold",
+  },
+
+  equalsButton: {
+    backgroundColor: "#007AFF",
+    height: 55,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 15,
+  },
+
+  equalsText: {
+    color: "white",
+    fontSize: 25,
+    fontWeight: "bold",
+  },
+
+  error: {
+    color: "red",
+    textAlign: "center",
+    fontSize: 16,
+    marginTop: 15,
   },
 
   clearButton: {
-    width: 170,
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#CBD5E1',
+    backgroundColor: "#d9534f",
+    padding: 15,
+    borderRadius: 10,
+    marginTop: 20,
   },
 
   clearText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#475569',
+    color: "white",
+    textAlign: "center",
+    fontSize: 18,
+    fontWeight: "bold",
   },
 });
