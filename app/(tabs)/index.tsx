@@ -1,72 +1,179 @@
-import React from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import React, { useState } from "react";
+import {
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 
-export default function HomeScreen() {
+export default function App() {
+  const [name, setName] = useState("");
+  const [program, setProgram] = useState("");
+  const [bio, setBio] = useState("");
+
+  const [savedName, setSavedName] = useState("");
+  const [savedProgram, setSavedProgram] = useState("");
+  const [savedBio, setSavedBio] = useState("");
+
+  const [message, setMessage] = useState("");
+
+  // SAVE PROFILE
+  const saveProfile = () => {
+    if (name.trim() === "") {
+      setMessage("Please enter your full name.");
+      return;
+    }
+
+    if (program.trim() === "") {
+      setMessage("Please enter your program.");
+      return;
+    }
+
+    if (bio.trim() === "") {
+      setMessage("Please enter your biography.");
+      return;
+    }
+
+    // Save the information
+    setSavedName(name);
+    setSavedProgram(program);
+    setSavedBio(bio);
+
+    setMessage("✓ Profile saved successfully!");
+  };
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.appTitle}>👋 Self Introduction</Text>
-        <Text style={styles.subtitle}>Get to know me</Text>
-      </View>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+    >
+      {/* TITLE */}
+      <Text style={styles.title}>
+        Personal Profile
+      </Text>
 
-      {/* Personal Information Card */}
-      <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Personal Information</Text>
+      <Text style={styles.subtitle}>
+        Create and edit your profile
+      </Text>
 
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>👤 Name</Text>
-          <Text style={styles.nameText}>Lhindex Khim T. Gamones</Text>
-        </View>
+      {/* PROFILE CONTAINER */}
+      <View style={styles.profileCard}>
+        <Image
+          source={{
+            uri: "https://i.pravatar.cc/300",
+          }}
+          style={styles.image}
+        />
 
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>🎂 Age</Text>
-          <Text style={styles.ageText}>23 years old</Text>
-        </View>
+        <Text style={styles.profileName}>
+          {savedName || "Your Name"}
+        </Text>
 
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>🎓 Program</Text>
-          <Text style={styles.programText}>BSIT</Text>
-        </View>
-      </View>
-
-      {/* Hobbies Card */}
-      <View style={styles.card}>
-        <Text style={styles.sectionTitle}>My Hobbies</Text>
-
-        <View style={styles.hobbiesContainer}>
-          <View style={styles.hobbyBox}>
-            <Text style={styles.hobbyEmoji}>🏀</Text>
-            <Text style={styles.hobbyText}>Basketball</Text>
-          </View>
-
-          <View style={styles.hobbyBox}>
-            <Text style={styles.hobbyEmoji}>🎮</Text>
-            <Text style={styles.hobbyText}>Gaming</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* About Me Card */}
-      <View style={styles.card}>
-        <Text style={styles.sectionTitle}>About Me</Text>
-
-        <Text style={styles.descriptionText}>
-          Hello! My name is Lhindex Khim T. Gamones. I am 23 years old and
-          currently taking Bachelor of Science in Information Technology. I
-          enjoy playing basketball and gaming during my free time.
+        <Text style={styles.profileProgram}>
+          {savedProgram || "Your Program"}
         </Text>
       </View>
 
-      {/* App Idea Card */}
-      <View style={styles.ideaCard}>
-        <Text style={styles.ideaTitle}>💰 My App Idea</Text>
+      {/* PERSONAL INFORMATION CONTAINER */}
+      <View style={styles.card}>
+        <Text style={styles.heading}>
+          Personal Information
+        </Text>
 
-        <Text style={styles.ideaText}>
-          My app idea is to create a personal budget application. I want to
-          make this app because I sometimes find it difficult to manage and
-          budget my money. The app will help users track their expenses, manage
-          their budget, and understand where their money goes.
+        {/* FULL NAME */}
+        <Text style={styles.label}>
+          Full Name
+        </Text>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your full name"
+          placeholderTextColor="#94A3B8"
+          value={name}
+          onChangeText={(text) => {
+            setName(text);
+            setMessage("");
+          }}
+        />
+
+        {/* PROGRAM */}
+        <Text style={styles.label}>
+          Program
+        </Text>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your program"
+          placeholderTextColor="#94A3B8"
+          value={program}
+          onChangeText={(text) => {
+            setProgram(text);
+            setMessage("");
+          }}
+        />
+
+        {/* BIO */}
+        <Text style={styles.label}>
+          Short Biography
+        </Text>
+
+        <TextInput
+          style={styles.bioInput}
+          placeholder="Write a short biography"
+          placeholderTextColor="#94A3B8"
+          value={bio}
+          onChangeText={(text) => {
+            setBio(text);
+            setMessage("");
+          }}
+          multiline
+        />
+      </View>
+
+      {/* SEPARATE SAVE CONTAINER */}
+      <View style={styles.saveContainer}>
+        <Text style={styles.saveTitle}>
+          Save Profile
+        </Text>
+
+        <Text style={styles.saveDescription}>
+          Save your information when you are finished.
+        </Text>
+
+        <Pressable
+          style={styles.saveButton}
+          onPress={saveProfile}
+        >
+          <Text style={styles.buttonText}>
+            Save Profile
+          </Text>
+        </Pressable>
+
+        {/* MESSAGE */}
+        {message !== "" && (
+          <Text
+            style={[
+              styles.message,
+              message.includes("Please") &&
+                styles.errorMessage,
+            ]}
+          >
+            {message}
+          </Text>
+        )}
+      </View>
+
+      {/* ABOUT ME */}
+      <View style={styles.aboutCard}>
+        <Text style={styles.aboutTitle}>
+          About Me
+        </Text>
+
+        <Text style={styles.aboutText}>
+          {savedBio || "No biography added yet."}
         </Text>
       </View>
     </ScrollView>
@@ -75,145 +182,168 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
+    flex: 1,
     backgroundColor: "#F1F5F9",
+  },
+
+  content: {
     padding: 20,
-    paddingTop: 50,
+    paddingTop: 40,
     paddingBottom: 40,
   },
 
-  header: {
-    alignItems: "center",
-    marginBottom: 25,
-  },
-
-  appTitle: {
-    fontSize: 30,
+  /* TITLE */
+  title: {
+    fontSize: 28,
     fontWeight: "bold",
+    textAlign: "center",
     color: "#1E293B",
   },
 
   subtitle: {
-    fontSize: 15,
+    textAlign: "center",
     color: "#64748B",
+    marginTop: 5,
+    marginBottom: 20,
+  },
+
+  /* PROFILE */
+  profileCard: {
+    backgroundColor: "#FFFFFF",
+    padding: 20,
+    borderRadius: 15,
+    alignItems: "center",
+    marginBottom: 20,
+  },
+
+  image: {
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    marginBottom: 12,
+  },
+
+  profileName: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#1E293B",
+  },
+
+  profileProgram: {
+    fontSize: 16,
+    color: "#2563EB",
     marginTop: 5,
   },
 
+  /* PERSONAL INFORMATION */
   card: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 18,
     padding: 20,
-    marginBottom: 16,
-
-    // Shadow for Android
-    elevation: 4,
-
-    // Shadow for iOS
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
+    borderRadius: 15,
+    marginBottom: 15,
   },
 
-  sectionTitle: {
+  heading: {
     fontSize: 20,
     fontWeight: "bold",
     color: "#2563EB",
     marginBottom: 15,
   },
 
-  infoRow: {
-    marginBottom: 15,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E2E8F0",
+  label: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#334155",
+    marginBottom: 6,
   },
 
-  infoLabel: {
+  input: {
+    backgroundColor: "#F8FAFC",
+    borderWidth: 1,
+    borderColor: "#CBD5E1",
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 15,
+    color: "#1E293B",
+    marginBottom: 15,
+  },
+
+  bioInput: {
+    backgroundColor: "#F8FAFC",
+    borderWidth: 1,
+    borderColor: "#CBD5E1",
+    borderRadius: 8,
+    padding: 12,
+    height: 100,
+    fontSize: 15,
+    color: "#1E293B",
+    textAlignVertical: "top",
+  },
+
+  /* SAVE CONTAINER */
+  saveContainer: {
+    backgroundColor: "#FFFFFF",
+    padding: 20,
+    borderRadius: 15,
+    marginBottom: 20,
+    borderWidth: 2,
+    borderColor: "#2563EB",
+  },
+
+  saveTitle: {
+    fontSize: 21,
+    fontWeight: "bold",
+    color: "#1E40AF",
+    marginBottom: 6,
+  },
+
+  saveDescription: {
     fontSize: 14,
     color: "#64748B",
-    marginBottom: 4,
+    marginBottom: 15,
   },
 
-  nameText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#1E293B",
-  },
-
-  ageText: {
-    fontSize: 17,
-    fontStyle: "italic",
-    color: "#7C3AED",
-  },
-
-  programText: {
-    fontSize: 17,
-    fontWeight: "600",
-    color: "#059669",
-  },
-
-  hobbiesContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-
-  hobbyBox: {
-    width: "48%",
-    backgroundColor: "#EFF6FF",
-    padding: 18,
-    borderRadius: 15,
+  saveButton: {
+    backgroundColor: "#2563EB",
+    padding: 15,
+    borderRadius: 8,
     alignItems: "center",
   },
 
-  hobbyEmoji: {
-    fontSize: 35,
+  buttonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+
+  message: {
+    textAlign: "center",
+    marginTop: 12,
+    color: "#166534",
+    fontWeight: "bold",
+  },
+
+  errorMessage: {
+    color: "#DC2626",
+  },
+
+  /* ABOUT */
+  aboutCard: {
+    backgroundColor: "#EFF6FF",
+    padding: 20,
+    borderRadius: 15,
+  },
+
+  aboutTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#1E40AF",
     marginBottom: 8,
   },
 
-  hobbyText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#1E40AF",
-  },
-
-  descriptionText: {
+  aboutText: {
     fontSize: 15,
     color: "#475569",
-    lineHeight: 24,
-    textAlign: "justify",
-  },
-
-  ideaCard: {
-    backgroundColor: "#DCFCE7",
-    borderRadius: 18,
-    padding: 20,
-
-    elevation: 4,
-
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-  },
-
-  ideaTitle: {
-    fontSize: 21,
-    fontWeight: "bold",
-    color: "#166534",
-    marginBottom: 12,
-  },
-
-  ideaText: {
-    fontSize: 15,
-    color: "#166534",
-    lineHeight: 24,
-    textAlign: "justify",
+    lineHeight: 22,
   },
 });
