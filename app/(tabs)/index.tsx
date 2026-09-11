@@ -1,644 +1,330 @@
-import React, { useState } from "react";
+
+import React from "react";
 import {
-  SafeAreaView,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
 
-const emptyProfile = {
-  fullName: "",
-  program: "",
-  biography: "",
-  email: "",
-  phone: "",
-};
+export default function Dashboard() {
+  const { width } = useWindowDimensions();
 
-export default function App() {
-  const [profile, setProfile] = useState(emptyProfile);
-  const [form, setForm] = useState(emptyProfile);
-  const [editing, setEditing] = useState(true);
-  const [errors, setErrors] = useState({});
-  const [message, setMessage] = useState("");
-
-  const updateField = (field, value) => {
-    setForm({
-      ...form,
-      [field]: value,
-    });
-
-    if (errors[field]) {
-      setErrors({
-        ...errors,
-        [field]: "",
-      });
-    }
-
-    setMessage("");
-  };
-
-  const validateForm = () => {
-    const validationErrors = {};
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!form.fullName.trim()) {
-      validationErrors.fullName = "Full name is required.";
-    }
-
-    if (!form.program.trim()) {
-      validationErrors.program = "Program is required.";
-    }
-
-    if (!form.email.trim()) {
-      validationErrors.email = "Email is required.";
-    } else if (!emailPattern.test(form.email.trim())) {
-      validationErrors.email = "Please enter a valid email address.";
-    }
-
-    setErrors(validationErrors);
-
-    return Object.keys(validationErrors).length === 0;
-  };
-
-  const saveProfile = () => {
-    if (!validateForm()) {
-      setMessage("Please complete the required fields.");
-      return;
-    }
-
-    const savedProfile = {
-      fullName: form.fullName.trim(),
-      program: form.program.trim(),
-      biography: form.biography.trim(),
-      email: form.email.trim(),
-      phone: form.phone.trim(),
-    };
-
-    setProfile(savedProfile);
-    setForm(savedProfile);
-    setEditing(false);
-    setMessage("✓ Profile saved successfully!");
-  };
-
-  const editProfile = () => {
-    setForm(profile);
-    setErrors({});
-    setMessage("");
-    setEditing(true);
-  };
-
-  const cancelEdit = () => {
-    setForm(profile);
-    setErrors({});
-    setMessage("");
-    setEditing(false);
-  };
-
-  const renderInput = (
-    label,
-    field,
-    placeholder,
-    options = {}
-  ) => {
-    const value = form[field];
-    const error = errors[field];
-
-    return (
-      <View style={styles.fieldContainer}>
-        <Text style={styles.label}>{label}</Text>
-
-        <TextInput
-          style={[
-            styles.input,
-            error && styles.inputError,
-            options.multiline && styles.bioInput,
-          ]}
-          value={value}
-          onChangeText={(text) => updateField(field, text)}
-          placeholder={placeholder}
-          placeholderTextColor="#9CA3AF"
-          {...options}
-        />
-
-        {error && <Text style={styles.errorText}>{error}</Text>}
-      </View>
-    );
-  };
+  // Changes the card arrangement depending on screen width
+  const isWideScreen = width >= 600;
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor="#F5F7FB"
-      />
+    <ScrollView style={styles.container}>
+      <View style={styles.content}>
 
-      <ScrollView
-        contentContainerStyle={styles.container}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Header */}
+        
         <View style={styles.header}>
-          <Text style={styles.title}>Personal Profile</Text>
+          <View>
+            <Text style={styles.greeting}>Good morning 👋</Text>
+            <Text style={styles.title}>Dashboard</Text>
+          </View>
 
-          <Text style={styles.subtitle}>
-            Enter and manage your personal information
-          </Text>
+          <TouchableOpacity style={styles.profileButton}>
+            <Text style={styles.profileText}>LG</Text>
+          </TouchableOpacity>
         </View>
 
-        {/* Profile Image */}
-        <View style={styles.imageContainer}>
-          <View style={styles.imagePlaceholder}>
-            <Text style={styles.imagePlaceholderText}>
-              PHOTO
+        
+        <Text style={styles.sectionTitle}>Overview</Text>
+
+        <View
+          style={[
+            styles.cardContainer,
+            isWideScreen && styles.wideCardContainer,
+          ]}
+        >
+          
+          <View style={[styles.card, isWideScreen && styles.wideCard]}>
+            <Text style={styles.cardLabel}>Total Balance</Text>
+            <Text style={styles.cardValue}>₱25,480</Text>
+            <Text style={styles.cardDescription}>
+              Available balance
             </Text>
           </View>
 
-          <Text style={styles.imageHint}>Profile Image</Text>
+          
+          <View style={[styles.card, isWideScreen && styles.wideCard]}>
+            <Text style={styles.cardLabel}>Expenses</Text>
+            <Text style={styles.cardValue}>₱8,250</Text>
+            <Text style={styles.cardDescription}>This month</Text>
+          </View>
+
+          
+          <View style={[styles.card, isWideScreen && styles.wideCard]}>
+            <Text style={styles.cardLabel}>Savings</Text>
+            <Text style={styles.cardValue}>₱12,300</Text>
+            <Text style={styles.cardDescription}>This month</Text>
+          </View>
         </View>
 
-        {/* Profile Card */}
-        <View style={styles.card}>
-          {editing ? (
-            <>
-              {renderInput(
-                "Full Name *",
-                "fullName",
-                "Enter your full name",
-                {
-                  autoCapitalize: "words",
-                }
-              )}
+        
+        <Text style={styles.sectionTitle}>Quick Actions</Text>
 
-              {renderInput(
-                "Program *",
-                "program",
-                "Enter your program"
-              )}
+        <View style={styles.actionContainer}>
+          <TouchableOpacity style={styles.actionButton}>
+            <Text style={styles.actionIcon}>＋</Text>
+            <Text style={styles.actionText}>Add Expense</Text>
+          </TouchableOpacity>
 
-              {renderInput(
-                "Short Biography",
-                "biography",
-                "Write a short biography about yourself",
-                {
-                  multiline: true,
-                  textAlignVertical: "top",
-                }
-              )}
+          <TouchableOpacity style={styles.actionButton}>
+            <Text style={styles.actionIcon}>📊</Text>
+            <Text style={styles.actionText}>View Reports</Text>
+          </TouchableOpacity>
 
-              {/* Contact Information */}
-              <View style={styles.contactSection}>
-                <Text style={styles.sectionTitle}>
-                  Contact Information
-                </Text>
-
-                {renderInput(
-                  "Email *",
-                  "email",
-                  "Enter your email",
-                  {
-                    keyboardType: "email-address",
-                    autoCapitalize: "none",
-                    autoCorrect: false,
-                  }
-                )}
-
-                {renderInput(
-                  "Phone Number",
-                  "phone",
-                  "Enter your phone number",
-                  {
-                    keyboardType: "phone-pad",
-                  }
-                )}
-              </View>
-
-              {/* Buttons */}
-              <View style={styles.buttonRow}>
-                {profile.fullName !== "" && (
-                  <TouchableOpacity
-                    style={styles.cancelButton}
-                    onPress={cancelEdit}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={styles.cancelButtonText}>
-                      Cancel
-                    </Text>
-                  </TouchableOpacity>
-                )}
-
-                <TouchableOpacity
-                  style={[
-                    styles.saveButton,
-                    profile.fullName === "" && styles.fullButton,
-                  ]}
-                  onPress={saveProfile}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.saveButtonText}>
-                    Save Profile
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </>
-          ) : (
-            <>
-              <View style={styles.fieldContainer}>
-                <Text style={styles.label}>Full Name *</Text>
-                <Text style={styles.value}>
-                  {profile.fullName}
-                </Text>
-              </View>
-
-              <View style={styles.fieldContainer}>
-                <Text style={styles.label}>Program *</Text>
-                <Text style={styles.value}>
-                  {profile.program}
-                </Text>
-              </View>
-
-              <View style={styles.fieldContainer}>
-                <Text style={styles.label}>
-                  Short Biography
-                </Text>
-
-                <Text style={styles.bioText}>
-                  {profile.biography ||
-                    "No biography provided."}
-                </Text>
-              </View>
-
-              <View style={styles.contactSection}>
-                <Text style={styles.sectionTitle}>
-                  Contact Information
-                </Text>
-
-                <View style={styles.fieldContainer}>
-                  <Text style={styles.label}>Email *</Text>
-                  <Text style={styles.value}>
-                    {profile.email}
-                  </Text>
-                </View>
-
-                <View style={styles.fieldContainer}>
-                  <Text style={styles.label}>
-                    Phone Number
-                  </Text>
-
-                  <Text style={styles.value}>
-                    {profile.phone ||
-                      "No phone number provided."}
-                  </Text>
-                </View>
-              </View>
-
-              <TouchableOpacity
-                style={styles.editButton}
-                onPress={editProfile}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.editButtonText}>
-                  Edit Profile
-                </Text>
-              </TouchableOpacity>
-            </>
-          )}
+          <TouchableOpacity style={styles.actionButton}>
+            <Text style={styles.actionIcon}>💰</Text>
+            <Text style={styles.actionText}>Add Savings</Text>
+          </TouchableOpacity>
         </View>
 
-        {/* Message */}
-        {message && (
-          <View
-            style={[
-              styles.messageBox,
-              message.startsWith("✓")
-                ? styles.successBox
-                : styles.warningBox,
-            ]}
-          >
-            <Text
-              style={[
-                styles.messageText,
-                message.startsWith("✓")
-                  ? styles.successText
-                  : styles.warningText,
-              ]}
-            >
-              {message}
-            </Text>
-          </View>
-        )}
+        
+        <Text style={styles.sectionTitle}>Recent Activity</Text>
 
-        {/* Saved Result */}
-        {!editing && profile.fullName !== "" && (
-          <View style={styles.savedResult}>
-            <Text style={styles.savedTitle}>
-              ✓ Saved Profile
-            </Text>
+        <View style={styles.activityBox}>
+          
+          <View style={styles.activityItem}>
+            <View>
+              <Text style={styles.activityTitle}>Food & Drinks</Text>
+              <Text style={styles.activityDate}>
+                Today, 10:30 AM
+              </Text>
+            </View>
 
-            <Text style={styles.savedText}>
-              Your information has been successfully saved
-              and is displayed above.
-            </Text>
+            <Text style={styles.expense}>-₱250</Text>
           </View>
-        )}
-      </ScrollView>
-    </SafeAreaView>
+
+          
+          <View style={styles.activityItem}>
+            <View>
+              <Text style={styles.activityTitle}>Transportation</Text>
+              <Text style={styles.activityDate}>
+                Yesterday, 5:20 PM
+              </Text>
+            </View>
+
+            <Text style={styles.expense}>-₱120</Text>
+          </View>
+
+          
+          <View style={styles.activityItem}>
+            <View>
+              <Text style={styles.activityTitle}>Monthly Savings</Text>
+              <Text style={styles.activityDate}>
+                September 8
+              </Text>
+            </View>
+
+            <Text style={styles.income}>+₱2,000</Text>
+          </View>
+        </View>
+
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#EEF4FF",
-  },
-
   container: {
-    padding: 18,
-    paddingBottom: 50,
+    flex: 1,
+    backgroundColor: "#F4F6F8",
   },
 
-  // Header
+  content: {
+    padding: 20,
+    paddingTop: 50,
+    maxWidth: 1000,
+    width: "100%",
+    alignSelf: "center",
+  },
+
+  
   header: {
-    marginBottom: 24,
-    paddingTop: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 30,
+  },
+
+  greeting: {
+    fontSize: 14,
+    color: "#777",
+    marginBottom: 4,
   },
 
   title: {
     fontSize: 30,
-    fontWeight: "800",
-    color: "#172554",
-    letterSpacing: 0.3,
+    fontWeight: "bold",
+    color: "#222",
   },
 
-  subtitle: {
-    fontSize: 14,
-    color: "#64748B",
-    marginTop: 6,
-    lineHeight: 20,
-  },
-
-  // Profile Image
-  imageContainer: {
-    alignItems: "center",
-    marginBottom: 24,
-  },
-
-  imagePlaceholder: {
-    width: 105,
-    height: 105,
-    borderRadius: 53,
-    backgroundColor: "#DBEAFE",
-    borderWidth: 4,
-    borderColor: "#FFFFFF",
-    alignItems: "center",
+  profileButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#2E7D32",
     justifyContent: "center",
-
-    shadowColor: "#1E3A8A",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 5,
+    alignItems: "center",
   },
 
-  imagePlaceholderText: {
-    color: "#2563EB",
+  profileText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+
+  
+  sectionTitle: {
     fontSize: 20,
-    fontWeight: "800",
-  },
-
-  imageHint: {
+    fontWeight: "bold",
+    color: "#222",
+    marginBottom: 14,
     marginTop: 10,
-    fontSize: 13,
-    color: "#64748B",
-    fontWeight: "500",
   },
 
-  // Main Card
+  
+  cardContainer: {
+    flexDirection: "column",
+    gap: 12,
+    marginBottom: 25,
+  },
+
+  wideCardContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+
   card: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 22,
-    padding: 22,
+    borderRadius: 16,
+    padding: 20,
+    minHeight: 130,
+    justifyContent: "center",
 
-    shadowColor: "#0F172A",
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
-      height: 5,
+      height: 2,
     },
     shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
+    shadowRadius: 5,
+    elevation: 3,
   },
 
-  // Fields
-  fieldContainer: {
-    marginBottom: 22,
+  wideCard: {
+    flex: 1,
+    minWidth: 250,
   },
 
-  label: {
+  cardLabel: {
     fontSize: 14,
-    fontWeight: "700",
-    color: "#1E293B",
-    marginBottom: 9,
-  },
-
-  value: {
-    fontSize: 17,
-    color: "#0F172A",
-    fontWeight: "600",
-    paddingVertical: 5,
-  },
-
-  input: {
-    borderWidth: 1.5,
-    borderColor: "#CBD5E1",
-    borderRadius: 13,
-    paddingHorizontal: 15,
-    paddingVertical: 13,
-    fontSize: 16,
-    color: "#0F172A",
-    backgroundColor: "#F8FAFC",
-  },
-
-  inputError: {
-    borderColor: "#EF4444",
-    backgroundColor: "#FEF2F2",
-  },
-
-  bioInput: {
-    minHeight: 110,
-    paddingTop: 14,
-  },
-
-  bioText: {
-    fontSize: 15,
-    lineHeight: 23,
-    color: "#475569",
-    backgroundColor: "#F8FAFC",
-    borderRadius: 12,
-    padding: 14,
-  },
-
-  errorText: {
-    color: "#DC2626",
-    fontSize: 12,
-    marginTop: 6,
-    fontWeight: "500",
-  },
-
-  // Contact Section
-  contactSection: {
-    borderTopWidth: 1,
-    borderTopColor: "#E2E8F0",
-    paddingTop: 20,
-    marginTop: 2,
+    color: "#777",
     marginBottom: 8,
   },
 
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: "#172554",
-    marginBottom: 17,
+  cardValue: {
+    fontSize: 26,
+    fontWeight: "bold",
+    color: "#222",
+    marginBottom: 5,
   },
 
-  // Buttons
-  buttonRow: {
+  cardDescription: {
+    fontSize: 12,
+    color: "#999",
+  },
+
+  
+  actionContainer: {
     flexDirection: "row",
-    marginTop: 5,
+    gap: 10,
+    marginBottom: 25,
   },
 
-  cancelButton: {
+  actionButton: {
     flex: 1,
-    borderWidth: 1.5,
-    borderColor: "#CBD5E1",
-    borderRadius: 13,
-    paddingVertical: 15,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 6,
     backgroundColor: "#FFFFFF",
-  },
-
-  cancelButtonText: {
-    color: "#475569",
-    fontSize: 16,
-    fontWeight: "700",
-  },
-
-  saveButton: {
-    flex: 1,
-    backgroundColor: "#2563EB",
-    borderRadius: 13,
-    paddingVertical: 15,
+    borderRadius: 14,
+    paddingVertical: 18,
     alignItems: "center",
     justifyContent: "center",
-    marginLeft: 6,
 
-    shadowColor: "#2563EB",
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 2,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 7,
-    elevation: 4,
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
   },
 
-  fullButton: {
-    flex: 1,
-    marginLeft: 0,
-  },
-
-  saveButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "800",
-  },
-
-  editButton: {
-    backgroundColor: "#2563EB",
-    borderRadius: 13,
-    paddingVertical: 15,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 5,
-
-    shadowColor: "#2563EB",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 7,
-    elevation: 4,
-  },
-
-  editButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "800",
-  },
-
-  // Feedback
-  messageBox: {
-    marginTop: 16,
-    padding: 15,
-    borderRadius: 13,
-  },
-
-  successBox: {
-    backgroundColor: "#ECFDF5",
-    borderWidth: 1,
-    borderColor: "#A7F3D0",
-  },
-
-  warningBox: {
-    backgroundColor: "#FFFBEB",
-    borderWidth: 1,
-    borderColor: "#FDE68A",
-  },
-
-  messageText: {
-    fontSize: 14,
-    fontWeight: "700",
-    textAlign: "center",
-  },
-
-  successText: {
-    color: "#047857",
-  },
-
-  warningText: {
-    color: "#B45309",
-  },
-
-  // Saved Profile
-  savedResult: {
-    marginTop: 16,
-    padding: 18,
-    backgroundColor: "#EFF6FF",
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "#BFDBFE",
-  },
-
-  savedTitle: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: "#1D4ED8",
+  actionIcon: {
+    fontSize: 24,
     marginBottom: 6,
   },
 
-  savedText: {
-    fontSize: 13,
-    color: "#3B82F6",
-    lineHeight: 20,
+  actionText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#333",
+    textAlign: "center",
+  },
+
+  
+  activityBox: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    paddingHorizontal: 18,
+    marginBottom: 30,
+
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.06,
+    shadowRadius: 5,
+    elevation: 2,
+  },
+
+  activityItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 18,
+    borderBottomWidth: 1,
+    borderBottomColor: "#EEEEEE",
+  },
+
+  activityTitle: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 4,
+  },
+
+  activityDate: {
+    fontSize: 12,
+    color: "#999",
+  },
+
+  expense: {
+    fontSize: 15,
+    fontWeight: "bold",
+    color: "#D9534F",
+  },
+
+  income: {
+    fontSize: 15,
+    fontWeight: "bold",
+    color: "#2E7D32",
   },
 });
+
