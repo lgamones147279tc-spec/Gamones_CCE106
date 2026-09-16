@@ -1,131 +1,129 @@
-
-import React from "react";
+import { Link, useRouter } from "expo-router";
 import {
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
-  View,
   useWindowDimensions,
+  View,
 } from "react-native";
+import StatCard from "../../components/StatCard";
+
+const tasks = [
+  {
+    id: "1",
+    title: "Create React Native App",
+    subject: "Mobile Development",
+    dueDate: "September 18, 2026",
+    status: "Completed",
+  },
+  {
+    id: "2",
+    title: "Study HCI Principles",
+    subject: "Human Computer Interaction",
+    dueDate: "September 19, 2026",
+    status: "Pending",
+  },
+  {
+    id: "3",
+    title: "Database ERD",
+    subject: "Database Management",
+    dueDate: "September 20, 2026",
+    status: "Pending",
+  },
+  {
+    id: "4",
+    title: "Finish UML Diagram",
+    subject: "Systems Analysis",
+    dueDate: "September 21, 2026",
+    status: "Completed",
+  },
+  {
+    id: "5",
+    title: "Prepare Presentation",
+    subject: "IT Project",
+    dueDate: "September 22, 2026",
+    status: "Pending",
+  },
+];
 
 export default function Dashboard() {
+  const router = useRouter();
   const { width } = useWindowDimensions();
 
-  // Changes the card arrangement depending on screen width
+  const totalTasks = tasks.length;
+  const completedTasks = tasks.filter(
+    (task) => task.status === "Completed"
+  ).length;
+  const pendingTasks = tasks.filter(
+    (task) => task.status === "Pending"
+  ).length;
+
   const isWideScreen = width >= 600;
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.content}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+    >
+      <View style={styles.header}>
+        <Text style={styles.title}>StudyFlow</Text>
 
-        
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.greeting}>Good morning 👋</Text>
-            <Text style={styles.title}>Dashboard</Text>
-          </View>
+        <Text style={styles.subtitle}>
+          Stay organized. Stay productive.
+        </Text>
+      </View>
 
-          <TouchableOpacity style={styles.profileButton}>
-            <Text style={styles.profileText}>LG</Text>
-          </TouchableOpacity>
-        </View>
+      <View style={styles.welcomeBox}>
+        <Text style={styles.welcomeTitle}>
+          Welcome back, Lhindex! 
+        </Text>
 
-        
-        <Text style={styles.sectionTitle}>Overview</Text>
+        <Text style={styles.welcomeText}>
+          Keep track of your school tasks and stay on top
+          of your deadlines.
+        </Text>
+      </View>
 
-        <View
-          style={[
-            styles.cardContainer,
-            isWideScreen && styles.wideCardContainer,
+      <Text style={styles.sectionTitle}>Your Progress</Text>
+
+      <View
+        style={[
+          styles.statsContainer,
+          isWideScreen && styles.wideStats,
+        ]}
+      >
+        <StatCard label="Total Tasks" value={totalTasks} />
+        <StatCard label="Completed" value={completedTasks} />
+        <StatCard label="Pending" value={pendingTasks} />
+      </View>
+
+      <Text style={styles.sectionTitle}>Quick Actions</Text>
+
+      <Link href="/(tabs)/tasks" asChild>
+        <Pressable
+          style={({ pressed }) => [
+            styles.primaryButton,
+            pressed && styles.buttonPressed,
           ]}
         >
-          
-          <View style={[styles.card, isWideScreen && styles.wideCard]}>
-            <Text style={styles.cardLabel}>Total Balance</Text>
-            <Text style={styles.cardValue}>₱25,480</Text>
-            <Text style={styles.cardDescription}>
-              Available balance
-            </Text>
-          </View>
+          <Text style={styles.buttonText}>
+            View All Tasks
+          </Text>
+        </Pressable>
+      </Link>
 
-          
-          <View style={[styles.card, isWideScreen && styles.wideCard]}>
-            <Text style={styles.cardLabel}>Expenses</Text>
-            <Text style={styles.cardValue}>₱8,250</Text>
-            <Text style={styles.cardDescription}>This month</Text>
-          </View>
-
-          
-          <View style={[styles.card, isWideScreen && styles.wideCard]}>
-            <Text style={styles.cardLabel}>Savings</Text>
-            <Text style={styles.cardValue}>₱12,300</Text>
-            <Text style={styles.cardDescription}>This month</Text>
-          </View>
-        </View>
-
-        
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
-
-        <View style={styles.actionContainer}>
-          <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.actionIcon}>＋</Text>
-            <Text style={styles.actionText}>Add Expense</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.actionIcon}>📊</Text>
-            <Text style={styles.actionText}>View Reports</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.actionIcon}>💰</Text>
-            <Text style={styles.actionText}>Add Savings</Text>
-          </TouchableOpacity>
-        </View>
-
-        
-        <Text style={styles.sectionTitle}>Recent Activity</Text>
-
-        <View style={styles.activityBox}>
-          
-          <View style={styles.activityItem}>
-            <View>
-              <Text style={styles.activityTitle}>Food & Drinks</Text>
-              <Text style={styles.activityDate}>
-                Today, 10:30 AM
-              </Text>
-            </View>
-
-            <Text style={styles.expense}>-₱250</Text>
-          </View>
-
-          
-          <View style={styles.activityItem}>
-            <View>
-              <Text style={styles.activityTitle}>Transportation</Text>
-              <Text style={styles.activityDate}>
-                Yesterday, 5:20 PM
-              </Text>
-            </View>
-
-            <Text style={styles.expense}>-₱120</Text>
-          </View>
-
-          
-          <View style={styles.activityItem}>
-            <View>
-              <Text style={styles.activityTitle}>Monthly Savings</Text>
-              <Text style={styles.activityDate}>
-                September 8
-              </Text>
-            </View>
-
-            <Text style={styles.income}>+₱2,000</Text>
-          </View>
-        </View>
-
-      </View>
+      <Pressable
+        onPress={() => router.push("/(tabs)/profile")}
+        style={({ pressed }) => [
+          styles.secondaryButton,
+          pressed && styles.buttonPressed,
+        ]}
+      >
+        <Text style={styles.secondaryButtonText}>
+          Edit Profile
+        </Text>
+      </Pressable>
     </ScrollView>
   );
 }
@@ -133,198 +131,97 @@ export default function Dashboard() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F4F6F8",
+    backgroundColor: "#F8FAFC",
   },
 
   content: {
     padding: 20,
-    paddingTop: 50,
-    maxWidth: 1000,
-    width: "100%",
-    alignSelf: "center",
+    paddingBottom: 40,
   },
 
-  
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 30,
-  },
-
-  greeting: {
-    fontSize: 14,
-    color: "#777",
-    marginBottom: 4,
+    marginBottom: 20,
   },
 
   title: {
-    fontSize: 30,
+    fontSize: 32,
     fontWeight: "bold",
-    color: "#222",
+    color: "#2563EB",
   },
 
-  profileButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#2E7D32",
-    justifyContent: "center",
+  subtitle: {
+    marginTop: 5,
+    fontSize: 15,
+    color: "#64748B",
+  },
+
+  welcomeBox: {
+    padding: 20,
+    borderRadius: 18,
+    backgroundColor: "#2563EB",
+    marginBottom: 25,
+  },
+
+  welcomeTitle: {
+    fontSize: 21,
+    fontWeight: "bold",
+    color: "#FFFFFF",
+  },
+
+  welcomeText: {
+    marginTop: 8,
+    fontSize: 14,
+    lineHeight: 21,
+    color: "#DBEAFE",
+  },
+
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#1E293B",
+    marginBottom: 12,
+  },
+
+  statsContainer: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 28,
+  },
+
+  wideStats: {
+    maxWidth: 800,
+  },
+
+  primaryButton: {
+    backgroundColor: "#2563EB",
+    padding: 16,
+    borderRadius: 14,
     alignItems: "center",
+    marginBottom: 12,
   },
 
-  profileText: {
-    color: "#FFF",
+  secondaryButton: {
+    backgroundColor: "#FFFFFF",
+    padding: 16,
+    borderRadius: 14,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#2563EB",
+  },
+
+  buttonPressed: {
+    opacity: 0.7,
+  },
+
+  buttonText: {
+    color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "bold",
   },
 
-  
-  sectionTitle: {
-    fontSize: 20,
+  secondaryButtonText: {
+    color: "#2563EB",
+    fontSize: 16,
     fontWeight: "bold",
-    color: "#222",
-    marginBottom: 14,
-    marginTop: 10,
-  },
-
-  
-  cardContainer: {
-    flexDirection: "column",
-    gap: 12,
-    marginBottom: 25,
-  },
-
-  wideCardContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-  },
-
-  card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 20,
-    minHeight: 130,
-    justifyContent: "center",
-
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.08,
-    shadowRadius: 5,
-    elevation: 3,
-  },
-
-  wideCard: {
-    flex: 1,
-    minWidth: 250,
-  },
-
-  cardLabel: {
-    fontSize: 14,
-    color: "#777",
-    marginBottom: 8,
-  },
-
-  cardValue: {
-    fontSize: 26,
-    fontWeight: "bold",
-    color: "#222",
-    marginBottom: 5,
-  },
-
-  cardDescription: {
-    fontSize: 12,
-    color: "#999",
-  },
-
-  
-  actionContainer: {
-    flexDirection: "row",
-    gap: 10,
-    marginBottom: 25,
-  },
-
-  actionButton: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 14,
-    paddingVertical: 18,
-    alignItems: "center",
-    justifyContent: "center",
-
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-
-  actionIcon: {
-    fontSize: 24,
-    marginBottom: 6,
-  },
-
-  actionText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#333",
-    textAlign: "center",
-  },
-
-  
-  activityBox: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    paddingHorizontal: 18,
-    marginBottom: 30,
-
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.06,
-    shadowRadius: 5,
-    elevation: 2,
-  },
-
-  activityItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 18,
-    borderBottomWidth: 1,
-    borderBottomColor: "#EEEEEE",
-  },
-
-  activityTitle: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: 4,
-  },
-
-  activityDate: {
-    fontSize: 12,
-    color: "#999",
-  },
-
-  expense: {
-    fontSize: 15,
-    fontWeight: "bold",
-    color: "#D9534F",
-  },
-
-  income: {
-    fontSize: 15,
-    fontWeight: "bold",
-    color: "#2E7D32",
   },
 });
-
