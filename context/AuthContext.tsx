@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars -- Setters and imports are reserved for exam TODOs. */
-import { createContext, useEffect, useState, type ReactNode } from 'react';
 import * as SecureStore from 'expo-secure-store';
+import { createContext, useEffect, useState, type ReactNode } from 'react';
 
 export type User = {
   id?: string | number;
@@ -30,12 +30,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // TODO EXAM: Save the access token with SecureStore.setItemAsync().
     // TODO EXAM: Update token state and user state with the supplied arguments.
     // TODO EXAM: Handle storage failures; never store the password.
+    try {
+    if (SecureStore.isAvailableAsync) {
+      const available = await SecureStore.isAvailableAsync();
+
+      if (available) {
+        await SecureStore.setItemAsync('access_token', accessToken);
+      }
+    }
+
+    setToken(accessToken);
+    setUser(userData);
+  } catch (error) {
+    console.error('Failed to save authentication session:', error);
+    throw new Error('Unable to save your login session.');
+  }
   };
 
   const logout = async () => {
+    
     // TODO EXAM: Delete the saved token using SecureStore.deleteItemAsync().
     // TODO EXAM: Clear token state and user state.
     // TODO EXAM: Handle storage errors and redirect to /sign-in after logout.
+    try {
+    if (SecureStore.isAvailableAsync) {
+      const available = await SecureStore.isAvailableAsync();
+
+      if (available) {
+        await SecureStore.deleteItemAsync('access_token');
+      }
+    }
+  } catch (error) {
+    console.error('Failed to clear authentication session:', error);
+  } finally {
+    setToken(null);
+    setUser(null);
+  }
   };
 
   const restoreSession = async () => {
