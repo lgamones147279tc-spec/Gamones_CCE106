@@ -21,43 +21,41 @@ export default function StudentsScreen() {
   const [search, setSearch] = useState('');
 
   const loadStudents = async () => {
-    // 1. Set loading and clear previous errors
     setLoading(true);
     setError('');
 
-    try {
-      // 2. GET /students
-      const response = await fetch(`${API_BASE_URL}/students`, {
-        method: 'GET',
-        headers: {
-          Accept: 'application/json',
-          ...(token
-            ? {
-                Authorization: `Bearer ${token}`,
-              }
-            : {}),
-        },
-      });
+    if (!token) {
+      setStudents([]);
+      setError('You are not authenticated.');
+      setLoading(false);
+      return;
+    }
 
-      // 4. Handle unauthorized
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/students`,
+        {
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
       if (response.status === 401) {
         await logout();
         return;
       }
 
-      // Check other HTTP errors
       if (!response.ok) {
         throw new Error(
           `Failed to load students. Server returned ${response.status}.`
         );
       }
 
-      // 5. Parse JSON
       const data = await response.json();
 
-      // Support either:
-      // [ ...students ]
-      // or { students: [ ...students ] }
       const studentList = Array.isArray(data)
         ? data
         : Array.isArray(data?.students)
@@ -66,13 +64,14 @@ export default function StudentsScreen() {
 
       setStudents(studentList);
     } catch (err) {
-      // 6. Handle errors
       console.error('Failed to load students:', err);
 
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Unable to load students. Please try again.');
+        setError(
+          'Unable to load students. Please try again.'
+        );
       }
     } finally {
       setLoading(false);
@@ -80,11 +79,9 @@ export default function StudentsScreen() {
   };
 
   useEffect(() => {
-    // Call loadStudents when screen loads
     loadStudents();
   }, [token]);
 
-  // Search/filter students by name
   const filteredStudents = students.filter((student) =>
     (student.name || '')
       .toLowerCase()
@@ -110,7 +107,6 @@ export default function StudentsScreen() {
             size="large"
             color="#245bb2"
           />
-
           <Text style={styles.text}>
             Loading students…
           </Text>

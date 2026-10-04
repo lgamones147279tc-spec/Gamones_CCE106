@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '@/constants/api';
+
 import { useAuth } from '@/hooks/useAuth';
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -12,6 +12,18 @@ import {
   View,
 } from 'react-native';
 
+const PLACEHOLDER_EMAIL = 'student@example.com';
+const PLACEHOLDER_PASSWORD = 'student123';
+
+const PLACEHOLDER_TOKEN = 'placeholder-token-12345';
+
+const PLACEHOLDER_USER = {
+  id: 1,
+  name: 'Lhindex Khim T. Gamones',
+  email: 'student@example.com',
+  role: 'Student',
+};
+
 export default function SignInScreen() {
   const { login } = useAuth();
 
@@ -21,7 +33,6 @@ export default function SignInScreen() {
   const [error, setError] = useState('');
 
   const handleLogin = async () => {
-    // 1. Validate email and password
     if (!email.trim()) {
       setError('Please enter your email.');
       return;
@@ -32,61 +43,28 @@ export default function SignInScreen() {
       return;
     }
 
-    // 2. Set loading and clear previous errors
     setLoading(true);
     setError('');
 
     try {
-      // 3. POST to /login
-      const response = await fetch(`${API_BASE_URL}/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        body: JSON.stringify({
-          email: email.trim(),
-          password,
-        }),
-      });
-
-      // 4. Check response
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data?.message || 'Invalid email or password.'
-        );
+      if (
+        email.trim().toLowerCase() !== PLACEHOLDER_EMAIL ||
+        password !== PLACEHOLDER_PASSWORD
+      ) {
+        throw new Error('Invalid email or password.');
       }
 
-      // 5. Get the returned access token
-      const accessToken =
-        data?.access_token ||
-        data?.accessToken ||
-        data?.token;
+      await login(
+        PLACEHOLDER_TOKEN,
+        PLACEHOLDER_USER
+      );
 
-      if (!accessToken) {
-        throw new Error('Login succeeded but no access token was returned.');
-      }
-
-      // Get user information returned by the API
-      const userData = data?.user || {
-        id: data?.id,
-        name: data?.name,
-        email: data?.email || email.trim(),
-        role: data?.role,
-      };
-
-      await login(accessToken, userData);
-
-      // 6. Navigate after successful authentication
       router.replace('/(app)');
     } catch (err) {
-      // 7. Handle login errors
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Unable to sign in. Please try again.');
+        setError('Unable to sign in.');
       }
     } finally {
       setLoading(false);
@@ -115,7 +93,6 @@ export default function SignInScreen() {
 
         <TextInput
           style={styles.input}
-          accessibilityLabel="Email"
           placeholder="student@example.com"
           value={email}
           onChangeText={setEmail}
@@ -129,23 +106,16 @@ export default function SignInScreen() {
 
         <TextInput
           style={styles.input}
-          accessibilityLabel="Password"
-          placeholder="Enter your password"
+          placeholder="student123"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
           editable={!loading}
         />
 
-        <View
-          style={styles.feedback}
-          accessibilityLiveRegion="polite"
-        >
+        <View style={styles.feedback}>
           {loading && (
-            <ActivityIndicator
-              color="#245bb2"
-              accessibilityLabel="Signing in"
-            />
+            <ActivityIndicator color="#245bb2" />
           )}
 
           {error ? (
@@ -154,7 +124,6 @@ export default function SignInScreen() {
         </View>
 
         <Pressable
-          accessibilityRole="button"
           style={styles.button}
           onPress={handleLogin}
           disabled={loading}
@@ -163,6 +132,20 @@ export default function SignInScreen() {
             {loading ? 'Signing in…' : 'Login'}
           </Text>
         </Pressable>
+
+        <View style={styles.testBox}>
+          <Text style={styles.testTitle}>
+            Test Account
+          </Text>
+
+          <Text style={styles.testText}>
+            Email: student@example.com
+          </Text>
+
+          <Text style={styles.testText}>
+            Password: student123
+          </Text>
+        </View>
       </View>
     </ScrollView>
   );
@@ -221,7 +204,7 @@ const styles = StyleSheet.create({
   },
 
   feedback: {
-    minHeight: 28,
+    minHeight: 30,
   },
 
   error: {
@@ -239,4 +222,23 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontWeight: '700',
   },
+
+  testBox: {
+    marginTop: 20,
+    padding: 14,
+    borderRadius: 8,
+    backgroundColor: '#f2f5fa',
+  },
+
+  testTitle: {
+    fontWeight: '700',
+    color: '#17324d',
+    marginBottom: 5,
+  },
+
+  testText: {
+    color: '#536579',
+    fontSize: 13,
+  },
 });
+

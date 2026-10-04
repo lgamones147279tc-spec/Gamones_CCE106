@@ -22,7 +22,7 @@ export default function StudentDetailsScreen() {
   const [error, setError] = useState('');
 
   const loadStudent = async () => {
-    // Validate the ID
+    // Validate the student ID
     if (!id || id.trim() === '') {
       setStudent(null);
       setError('Student ID is missing.');
@@ -34,30 +34,32 @@ export default function StudentDetailsScreen() {
     setError('');
     setStudent(null);
 
+    // Check authentication before making the request
+    if (!token) {
+      setError('You are not authenticated.');
+      setLoading(false);
+      return;
+    }
+
     try {
-      // GET /students/{id}
       const response = await fetch(
         `${API_BASE_URL}/students/${encodeURIComponent(id)}`,
         {
           method: 'GET',
           headers: {
             Accept: 'application/json',
-            ...(token
-              ? {
-                  Authorization: `Bearer ${token}`,
-                }
-              : {}),
+            Authorization: `Bearer ${token}`,
           },
         }
       );
 
-      // Handle expired/invalid token
+      // Handle expired or invalid token
       if (response.status === 401) {
         await logout();
         return;
       }
 
-      // Handle missing student
+      // Handle student not found
       if (response.status === 404) {
         setError('Student record not found.');
         return;
@@ -72,23 +74,34 @@ export default function StudentDetailsScreen() {
 
       const data = await response.json();
 
-      // Some APIs return the student directly,
-      // while others may return { student: {...} }.
+      // Support either:
+      // { id, name, email, course }
+      // or { student: { id, name, email, course } }
       const studentData: Student =
         data?.student ?? data;
 
-      if (!studentData || typeof studentData !== 'object') {
-        throw new Error('Invalid student data received from the server.');
+      if (
+        !studentData ||
+        typeof studentData !== 'object'
+      ) {
+        throw new Error(
+          'Invalid student data received from the server.'
+        );
       }
 
       setStudent(studentData);
     } catch (err) {
-      console.error('Failed to load student:', err);
+      console.error(
+        'Failed to load student:',
+        err
+      );
 
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Unable to load student details.');
+        setError(
+          'Unable to load student details.'
+        );
       }
     } finally {
       setLoading(false);
@@ -101,7 +114,9 @@ export default function StudentDetailsScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Student Details</Text>
+      <Text style={styles.title}>
+        Student Details
+      </Text>
 
       {loading ? (
         <View style={styles.state}>
@@ -109,6 +124,7 @@ export default function StudentDetailsScreen() {
             size="large"
             color="#245bb2"
           />
+
           <Text style={styles.text}>
             Loading student…
           </Text>
@@ -126,7 +142,9 @@ export default function StudentDetailsScreen() {
             accessibilityRole="button"
             onPress={loadStudent}
           >
-            <Text style={styles.link}>Try Again</Text>
+            <Text style={styles.link}>
+              Try Again
+            </Text>
           </Pressable>
         </View>
       ) : !student ? (
@@ -160,7 +178,9 @@ export default function StudentDetailsScreen() {
         style={styles.button}
         onPress={() => router.back()}
       >
-        <Text style={styles.buttonText}>Back</Text>
+        <Text style={styles.buttonText}>
+          Back
+        </Text>
       </Pressable>
     </ScrollView>
   );

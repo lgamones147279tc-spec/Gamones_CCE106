@@ -1,5 +1,4 @@
 import { API_BASE_URL } from '@/constants/api';
-import type { User } from '@/context/AuthContext';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useState } from 'react';
 import {
@@ -12,9 +11,9 @@ import {
 } from 'react-native';
 
 export default function ProfileScreen() {
-  const { user, token, logout, login } = useAuth();
+  const { user, token, logout } = useAuth();
 
-  const [profile, setProfile] = useState<User | null>(user);
+  const [profile, setProfile] = useState(user);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -38,7 +37,7 @@ export default function ProfileScreen() {
         },
       });
 
-      // Handle expired/invalid session
+      // Handle expired or invalid session
       if (response.status === 401) {
         await logout();
         return;
@@ -55,12 +54,13 @@ export default function ProfileScreen() {
       // Support either:
       // { id, name, email, role }
       // or { user: { id, name, email, role } }
-      const profileData: User = data?.user ?? data;
+      const profileData = data?.user ?? data;
+
+      if (!profileData || typeof profileData !== 'object') {
+        throw new Error('Invalid profile data received from the server.');
+      }
 
       setProfile(profileData);
-
-      // Keep AuthContext user information updated
-      await login(token, profileData);
     } catch (err) {
       console.error('Failed to load profile:', err);
 
