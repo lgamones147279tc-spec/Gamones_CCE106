@@ -1,4 +1,5 @@
 
+import { API_BASE_URL } from '@/constants/api';
 import { useAuth } from '@/hooks/useAuth';
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -11,18 +12,6 @@ import {
   TextInput,
   View,
 } from 'react-native';
-
-const PLACEHOLDER_EMAIL = 'student@example.com';
-const PLACEHOLDER_PASSWORD = 'student123';
-
-const PLACEHOLDER_TOKEN = 'placeholder-token-12345';
-
-const PLACEHOLDER_USER = {
-  id: 1,
-  name: 'Lhindex Khim T. Gamones',
-  email: 'student@example.com',
-  role: 'Student',
-};
 
 export default function SignInScreen() {
   const { login } = useAuth();
@@ -47,24 +36,69 @@ export default function SignInScreen() {
     setError('');
 
     try {
-      if (
-        email.trim().toLowerCase() !== PLACEHOLDER_EMAIL ||
-        password !== PLACEHOLDER_PASSWORD
-      ) {
-        throw new Error('Invalid email or password.');
+      console.log('LOGIN API:', `${API_BASE_URL}/login`);
+
+      const response = await fetch(`${API_BASE_URL}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          password,
+        }),
+      });
+
+      console.log('LOGIN STATUS:', response.status);
+
+      const data = await response.json();
+
+      console.log('LOGIN RESPONSE:', data);
+
+      if (!response.ok) {
+        throw new Error(
+          data?.message || `Login failed. Server returned ${response.status}.`
+        );
       }
 
-      await login(
-        PLACEHOLDER_TOKEN,
-        PLACEHOLDER_USER
-      );
+      const accessToken =
+        data?.access_token ||
+        data?.accessToken ||
+        data?.token;
+
+      if (!accessToken) {
+        throw new Error(
+          'Login succeeded, but the API did not return an access token.'
+        );
+      }
+
+      const userData = data?.user || {
+        id: data?.id,
+        name: data?.name || email.trim(),
+        email: data?.email || email.trim(),
+        role: data?.role || 'Student',
+      };
+
+      console.log('TOKEN:', accessToken);
+      console.log('USER:', userData);
+
+      await login(accessToken, userData);
+
+      console.log('AUTH LOGIN COMPLETE');
 
       router.replace('/(app)');
     } catch (err) {
-      if (err instanceof Error) {
+      console.error('LOGIN ERROR:', err);
+
+      if (err instanceof TypeError && err.message.includes('fetch')) {
+        setError(
+          'Cannot connect to the Mock API. Make sure node service.js is running.'
+        );
+      } else if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Unable to sign in.');
+        setError('Unable to sign in. Please try again.');
       }
     } finally {
       setLoading(false);
@@ -115,11 +149,16 @@ export default function SignInScreen() {
 
         <View style={styles.feedback}>
           {loading && (
-            <ActivityIndicator color="#245bb2" />
+            <ActivityIndicator
+              size="small"
+              color="#245bb2"
+            />
           )}
 
           {error ? (
-            <Text style={styles.error}>{error}</Text>
+            <Text style={styles.error}>
+              {error}
+            </Text>
           ) : null}
         </View>
 
@@ -129,23 +168,15 @@ export default function SignInScreen() {
           disabled={loading}
         >
           <Text style={styles.buttonText}>
-            {loading ? 'Signing in…' : 'Login'}
+            {loading ? 'Signing in...' : 'Login'}
           </Text>
         </Pressable>
 
-        <View style={styles.testBox}>
-          <Text style={styles.testTitle}>
-            Test Account
-          </Text>
-
-          <Text style={styles.testText}>
-            Email: student@example.com
-          </Text>
-
-          <Text style={styles.testText}>
-            Password: student123
-          </Text>
-        </View>
+        <Text style={styles.credentials}>
+          Test Account{'\n'}
+          Email: student@example.com{'\n'}
+          Password: student123
+        </Text>
       </View>
     </ScrollView>
   );
@@ -204,11 +235,14 @@ const styles = StyleSheet.create({
   },
 
   feedback: {
-    minHeight: 30,
+    minHeight: 40,
+    justifyContent: 'center',
+    marginBottom: 8,
   },
 
   error: {
     color: '#b42318',
+    textAlign: 'center',
   },
 
   button: {
@@ -223,22 +257,12 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
-  testBox: {
+  credentials: {
     marginTop: 20,
-    padding: 14,
-    borderRadius: 8,
-    backgroundColor: '#f2f5fa',
-  },
-
-  testTitle: {
-    fontWeight: '700',
-    color: '#17324d',
-    marginBottom: 5,
-  },
-
-  testText: {
     color: '#536579',
-    fontSize: 13,
+    fontSize: 12,
+    lineHeight: 20,
+    textAlign: 'center',
   },
 });
 

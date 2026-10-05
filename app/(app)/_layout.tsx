@@ -5,7 +5,6 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 export default function AppLayout() {
   const { token, authLoading } = useAuth();
 
-  // TODO EXAM: Check authentication and session restoration before showing the tabs.
   if (authLoading) {
     return (
       <View style={styles.loading}>
@@ -14,7 +13,6 @@ export default function AppLayout() {
     );
   }
 
-  // TODO EXAM: Redirect unauthenticated users to /sign-in.
   if (!token) {
     return <Redirect href="/sign-in" />;
   }
